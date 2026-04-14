@@ -15,7 +15,6 @@ java {
 
 repositories {
     mavenCentral()
-    // Spring Boot 4.x RC – nie ma jeszcze na Maven Central
     maven("https://repo.spring.io/milestone")
 }
 
