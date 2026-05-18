@@ -18,7 +18,6 @@ java {
 dependencies {
     implementation(project(":shared"))
     implementation("org.springframework.boot:spring-boot-starter-web")
-    runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 

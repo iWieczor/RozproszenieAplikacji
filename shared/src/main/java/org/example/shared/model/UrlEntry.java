@@ -1,29 +1,27 @@
 package org.example.shared.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import org.springframework.data.cassandra.core.mapping.Column;
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
+import org.springframework.data.cassandra.core.mapping.Table;
 import java.time.Duration;
 import java.time.Instant;
 
-@Entity
-@Table(name = "url_entries")
+@Table("url_entries")
 public class UrlEntry {
 
-    @Id
+    @PrimaryKey
     private String shortCode;
 
-    @Column(nullable = false, length = 2048)
+    @Column("original_url")
     private String originalUrl;
 
-    @Column(nullable = false)
+    @Column("created_at")
     private Instant createdAt;
 
-    @Column(nullable = false)
+    @Column("expires_at")
     private Instant expiresAt;
 
-    protected UrlEntry() {}
+    public UrlEntry() {}
 
     public UrlEntry(String shortCode, String originalUrl, Instant createdAt, Duration ttl) {
         this.shortCode = shortCode;

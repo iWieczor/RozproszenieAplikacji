@@ -1,20 +1,73 @@
 services:
 
-  postgres:
-    image: postgres:16
+  cassandra1:
+    image: cassandra:4.1
+    container_name: cassandra1
+    mem_limit: 1g
     environment:
-      POSTGRES_DB: urlshortener
-      POSTGRES_USER: urluser
-      POSTGRES_PASSWORD: urlpassword
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      CASSANDRA_CLUSTER_NAME: url-cluster
+      CASSANDRA_DC: datacenter1
+      CASSANDRA_SEEDS: cassandra1
+      MAX_HEAP_SIZE: 512M
+      HEAP_NEWSIZE: 100M
     ports:
-      - "5432:5432"
+      - "9042:9042"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U urluser -d urlshortener"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+
+  cassandra2:
+    image: cassandra:4.1
+    container_name: cassandra2
+    mem_limit: 1g
+    environment:
+      CASSANDRA_CLUSTER_NAME: url-cluster
+      CASSANDRA_DC: datacenter1
+      CASSANDRA_SEEDS: cassandra1
+      MAX_HEAP_SIZE: 512M
+      HEAP_NEWSIZE: 100M
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+    depends_on:
+      cassandra1:
+        condition: service_healthy
+
+  cassandra3:
+    image: cassandra:4.1
+    container_name: cassandra3
+    mem_limit: 1g
+    environment:
+      CASSANDRA_CLUSTER_NAME: url-cluster
+      CASSANDRA_DC: datacenter1
+      CASSANDRA_SEEDS: cassandra1
+      MAX_HEAP_SIZE: 512M
+      HEAP_NEWSIZE: 100M
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+    depends_on:
+      cassandra2:
+        condition: service_healthy
+
+  cassandra-init:
+    image: cassandra:4.1
+    depends_on:
+      cassandra1:
+        condition: service_healthy
+    volumes:
+      - ./cassandra/init.cql:/init.cql
+    command: cqlsh cassandra1 -f /init.cql
+    restart: on-failure
 
   writer:
     build:
@@ -23,14 +76,15 @@ services:
     ports:
       - "8081:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/urlshortener
-      SPRING_DATASOURCE_USERNAME: urluser
-      SPRING_DATASOURCE_PASSWORD: urlpassword
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_CASSANDRA_CONTACT_POINTS: cassandra1
+      SPRING_CASSANDRA_PORT: 9042
+      SPRING_CASSANDRA_KEYSPACE_NAME: urlshortener
+      SPRING_CASSANDRA_LOCAL_DATACENTER: datacenter1
+      SPRING_CASSANDRA_SCHEMA_ACTION: create_if_not_exists
       URL_SHORTENER_BASE_URL: http://localhost:8082
     depends_on:
-      postgres:
-        condition: service_healthy
+      cassandra-init:
+        condition: service_completed_successfully
 
   reader:
     build:
@@ -39,14 +93,12 @@ services:
     ports:
       - "8082:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/urlshortener
-      SPRING_DATASOURCE_USERNAME: urluser
-      SPRING_DATASOURCE_PASSWORD: urlpassword
-      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_CASSANDRA_CONTACT_POINTS: cassandra1
+      SPRING_CASSANDRA_PORT: 9042
+      SPRING_CASSANDRA_KEYSPACE_NAME: urlshortener
+      SPRING_CASSANDRA_LOCAL_DATACENTER: datacenter1
+      SPRING_CASSANDRA_SCHEMA_ACTION: create_if_not_exists
       URL_SHORTENER_BASE_URL: http://localhost:8082
     depends_on:
-      postgres:
-        condition: service_healthy
-
-volumes:
-  postgres_data:
+      cassandra-init:
+        condition: service_completed_successfully
