@@ -10,9 +10,9 @@ COPY writer/ writer/
 COPY reader/ reader/
 COPY cleaner/ cleaner/
 
-RUN chmod +x gradlew && ./gradlew :writer:bootJar --no-daemon -x test
+RUN chmod +x gradlew && ./gradlew :cleaner:bootJar --no-daemon -x test
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
-COPY --from=build /app/writer/build/libs/writer.jar app.jar
+COPY --from=build /app/cleaner/build/libs/cleaner.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]

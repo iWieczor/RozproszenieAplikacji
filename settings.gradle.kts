@@ -7,4 +7,4 @@ pluginManagement {
     }
 }
 
-include("shared", "writer", "reader")
+include("shared", "writer", "reader", "cleaner")

@@ -43,13 +43,16 @@ public class ReaderController {
     @GetMapping("/api/info/{code}")
     public ResponseEntity<Map<String, Object>> info(@PathVariable String code) {
         return service.getEntry(code)
-                .map(entry -> ResponseEntity.ok(Map.<String, Object>of(
-                        "shortCode", entry.getShortCode(),
-                        "originalUrl", entry.getOriginalUrl(),
-                        "createdAt", entry.getCreatedAt().toString(),
-                        "expiresAt", entry.getExpiresAt().toString(),
-                        "expired", entry.isExpired()
-                )))
+                .map(entry -> {
+                    Map<String, Object> map = new java.util.LinkedHashMap<>();
+                    map.put("shortCode", entry.getShortCode());
+                    map.put("originalUrl", entry.getOriginalUrl());
+                    map.put("createdAt", entry.getCreatedAt() != null ? entry.getCreatedAt().toString() : null);
+                    map.put("expiresAt", entry.getExpiresAt() != null ? entry.getExpiresAt().toString() : null);
+                    map.put("lastUsedAt", entry.getLastUsedAt() != null ? entry.getLastUsedAt().toString() : null);
+                    map.put("expired", entry.isExpired());
+                    return ResponseEntity.ok(map);
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 }

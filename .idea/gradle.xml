@@ -8,6 +8,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/cleaner" />
             <option value="$PROJECT_DIR$/reader" />
             <option value="$PROJECT_DIR$/shared" />
             <option value="$PROJECT_DIR$/writer" />

@@ -102,3 +102,23 @@ services:
     depends_on:
       cassandra-init:
         condition: service_completed_successfully
+
+  cleaner:
+    build:
+      context: .
+      dockerfile: cleaner/Dockerfile
+    environment:
+      SPRING_CASSANDRA_CONTACT_POINTS: cassandra1
+      SPRING_CASSANDRA_PORT: 9042
+      SPRING_CASSANDRA_KEYSPACE_NAME: urlshortener
+      SPRING_CASSANDRA_LOCAL_DATACENTER: datacenter1
+      SPRING_CASSANDRA_SCHEMA_ACTION: create_if_not_exists
+      # Strategia: BY_CREATION lub BY_LAST_USED
+      CLEANER_STRATEGY: BY_CREATION
+      # Próg TTL (ISO 8601): PT30S=30s, P90D=90 dni, P1Y=rok
+      CLEANER_TTL: PT30S
+      # Cron: co 30 sekund
+      CLEANER_CRON: "0/30 * * * * *"
+    depends_on:
+      cassandra-init:
+        condition: service_completed_successfully

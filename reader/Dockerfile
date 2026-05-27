@@ -8,6 +8,7 @@ COPY build.gradle.kts .
 COPY shared/ shared/
 COPY writer/ writer/
 COPY reader/ reader/
+COPY cleaner/ cleaner/
 
 RUN chmod +x gradlew && ./gradlew :reader:bootJar --no-daemon -x test
 

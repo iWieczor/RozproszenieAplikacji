@@ -21,6 +21,9 @@ public class UrlEntry {
     @Column("expires_at")
     private Instant expiresAt;
 
+    @Column("last_used_at")
+    private Instant lastUsedAt;
+
     public UrlEntry() {}
 
     public UrlEntry(String shortCode, String originalUrl, Instant createdAt, Duration ttl) {
@@ -31,11 +34,13 @@ public class UrlEntry {
     }
 
     public boolean isExpired() {
-        return Instant.now().isAfter(expiresAt);
+        return expiresAt == null || Instant.now().isAfter(expiresAt);
     }
 
     public String getShortCode() { return shortCode; }
     public String getOriginalUrl() { return originalUrl; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getExpiresAt() { return expiresAt; }
+    public Instant getLastUsedAt() { return lastUsedAt; }
+    public void setLastUsedAt(Instant lastUsedAt) { this.lastUsedAt = lastUsedAt; }
 }
