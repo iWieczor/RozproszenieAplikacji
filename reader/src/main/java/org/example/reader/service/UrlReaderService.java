@@ -42,7 +42,7 @@ public class UrlReaderService {
         // raw CQL UPDATE — nie nadpisuje natywnego TTL Cassandry
         cassandraOperations.getCqlOperations().execute(
             SimpleStatement.newInstance(
-                "UPDATE url_entries SET last_used_at = ? WHERE short_code = ?",
+                "UPDATE url_entries SET last_used_at = ? WHERE shortcode = ?",
                 now, shortCode
             )
         );
